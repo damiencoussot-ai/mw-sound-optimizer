@@ -1,0 +1,28 @@
+name: Release
+
+# Publie une release quand tu pousses un tag, par exemple :  git tag v3.0.0 && git push origin v3.0.0
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install -r requirements.txt -r requirements-dev.txt
+      - run: python -m unittest discover -s tests -v
+      - run: ./build.ps1
+      - uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            dist/MW_Sound_Optimizer.exe
+            dist/MW_Sound_Optimizer.exe.sha256
